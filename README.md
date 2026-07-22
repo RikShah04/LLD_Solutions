@@ -1,7 +1,6 @@
 # LLD Solutions
 
 My solutions to Low Level Design problems, implemented in Python.
-Working through these as part of interview preparation.
 
 ## Problems
 
