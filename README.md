@@ -1,4 +1,4 @@
-# LLD Solutions
+# Low Level Design Solutions
 
 My solutions to Low Level Design problems, implemented in Python.
 
