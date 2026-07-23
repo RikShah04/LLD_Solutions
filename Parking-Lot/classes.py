@@ -5,80 +5,53 @@ class Vehicle:
         self.color = color
 
 class ParkingFloor:
-    def __init__(self, no_of_slots_per_floor):
-        self.truck = None
-        self.bikes = [None, None]
-        self.cars = [None] * (no_of_slots_per_floor - 3)
+    def __init__(self, no_of_slots_per_floor, slot_config):
+        self.slot_config = slot_config
+        self.slots = [None] * no_of_slots_per_floor
 
     def park(self, vehicle):
-
         avail = self.checkStatus(vehicle.type, True)
 
         if not avail:
             return -1
 
-        if vehicle.type == "TRUCK":
-            self.truck = vehicle
-            return 1
+        start, end = self.slot_config[vehicle.type]
         
-        elif vehicle.type == "BIKE":
-            if not self.bikes[0]:
-                self.bikes[0] = vehicle
-                return 2
-            else:
-                 self.bikes[1] = vehicle
-                 return 3
-            
-        elif vehicle.type == "CAR":
-            for i in range(len(self.cars)):
-                if not self.cars[i]:
-                    self.cars[i] = vehicle
-                    return i + 4
+        for i in range(start, end):
+            if not self.slots[i]:
+                self.slots[i] = vehicle
+                return i + 1
                 
     def checkStatus(self, type, status):
-        avail = []
-        if type == "TRUCK":
-            avail.append(1) if (self.truck is None) == status else 0
+        if type not in self.slot_config:
+            return []
         
-        elif type == "BIKE":
-            if (self.bikes[0] is None) == status:
-                avail.append(2) 
-            if (self.bikes[1] is None) == status:
-                avail.append(3) 
-            
-        elif type == "CAR":
-            for i, car in enumerate(self.cars):
-                if (car is None) == status:
-                    avail.append(i + 4)
+        avail = []
+        
+        start, end = self.slot_config[type]
+
+        for i in range(start, end):
+            if (self.slots[i] == None) == status:
+                avail.append(i + 1)
 
         return avail
 
     def unPark(self, slot):
-        if slot == 1:
-            unParked = self.truck
-            self.truck = None
+        if not (1 <= slot <= len(self.slots)):
+            return None
 
-        elif slot == 2:
-            unParked = self.bikes[0]
-            self.bikes[0] = None
-
-        elif slot == 3:
-            unParked = self.bikes[1]
-            self.bikes[1] = None
-
-        else:
-            unParked = self.cars[slot - 4]
-            self.cars[slot - 4] = None
+        unParked = self.slots[slot - 1]
+        self.slots[slot - 1] = None
 
         return unParked
-
         
             
 class ParkingLot:
     def __init__(self, parking_lot_id, no_of_floors, no_of_slots_per_floor):
         self.id = parking_lot_id
         self.no_of_slots_per_floor = no_of_slots_per_floor
-        self.floors = [ParkingFloor(no_of_slots_per_floor) for _ in range(no_of_floors)] 
+        slot_config = {"TRUCK": (0,1), "BIKE": (1,3), "CAR": (3, no_of_slots_per_floor) }
+        self.floors = [ParkingFloor(no_of_slots_per_floor, slot_config) for _ in range(no_of_floors)] 
 
     def park(self, vehicle):
         for i, floor in enumerate(self.floors):
@@ -92,6 +65,9 @@ class ParkingLot:
         return None
 
     def unPark(self, ticket):
+        if not(1 <= ticket.floor_no <= len(self.floors)):
+            return None
+        
         return self.floors[ticket.floor_no - 1].unPark(ticket.slot_no)
 
     def getStatus(self, type, status):
